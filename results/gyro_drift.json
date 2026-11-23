@@ -1,0 +1,14 @@
+{
+ "A_all_sensors": {
+  "tilt_error_deg_at_30s": 26.2,
+  "tilt_error_deg_at_60s": 48.2,
+  "tilt_error_deg_at_120s": 58.2,
+  "duration_s": 140.2
+ },
+ "B_all_sensors_long": {
+  "tilt_error_deg_at_30s": 1.6,
+  "tilt_error_deg_at_60s": 3.3,
+  "tilt_error_deg_at_120s": 4.9,
+  "duration_s": 182.2
+ }
+}

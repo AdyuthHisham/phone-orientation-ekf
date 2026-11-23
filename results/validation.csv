@@ -1,0 +1,7 @@
+recording,samples,max_abs_diff_quaternion
+A_all_sensors,17085,6.476e-09
+B_all_sensors_long,22207,1.893e-09
+C_gyro_acc_gated,10852,6.121e-08
+D_gyro_acc_ungated,10080,3.52e-09
+E_gyro_mag_gated,17650,7.3e-10
+F_gyro_mag_ungated,13701,1.869e-09
