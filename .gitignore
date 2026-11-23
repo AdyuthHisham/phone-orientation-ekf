@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv/
+*.asv
+*.m~
+*.autosave
+.DS_Store
+# course-provided, not redistributed (see README "Real-time implementation")
+*.jar
