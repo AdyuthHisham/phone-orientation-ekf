@@ -147,7 +147,7 @@ MATLAB/Octave: run `src/matlab/scripts/reproduceMetrics.m` (same numbers).
 ## Team Members
 
 * Adyuth Hisham Babu Syed ([@AdyuthHisham](https://github.com/AdyuthHisham))
-* Anrid239 ([@Anrid239](https://github.com/Anrid239))
+* Anirudh Vinod Nair ([@Anrid239](https://github.com/Anrid239))
 
 Built for SSY345 Sensor Fusion and Nonlinear Filtering, Chalmers.
 
