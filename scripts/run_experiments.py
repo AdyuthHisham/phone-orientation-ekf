@@ -54,7 +54,7 @@ def main():
     val = []
     for rec, kw in VALIDATION.items():
         m = load(rec)
-        r = run(m, legacy_process_model=True, **kw)
+        r = run(m, **kw)
         val.append(dict(recording=rec, samples=len(m.t), max_abs_diff_quaternion=float(np.abs(r['x'] - m.xhat_matlab).max())))
     write_csv(RES / 'validation.csv', val)
 

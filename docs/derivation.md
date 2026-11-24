@@ -3,11 +3,11 @@
 State $x=q\in\mathbb R^4$ (world→sensor, [conventions](conventions.md)), covariance $P\in\mathbb R^{4\times4}$.
 
 ## Time update (gyroscope)
-Kinematics for $q$ world→sensor with body angular rate $\omega$:
-$$\dot q=\tfrac12 S(\omega)\,q,\qquad S(\omega)=-L(\omega)=\begin{pmatrix}0&\omega_x&\omega_y&\omega_z\\-\omega_x&0&\omega_z&-\omega_y\\-\omega_y&-\omega_z&0&\omega_x\\-\omega_z&\omega_y&-\omega_x&0\end{pmatrix}$$
-with $L(\omega)$ the left-multiplication matrix of the pure quaternion $[0,\omega]$. Euler discretisation, sample time $T$:
+Kinematics with body angular rate $\omega$ (course template):
+$$\dot q=\tfrac12 S(\omega)\,q,\qquad S(\omega)=\begin{pmatrix}0&-\omega_x&-\omega_y&-\omega_z\\\omega_x&0&\omega_z&-\omega_y\\\omega_y&-\omega_z&0&\omega_x\\\omega_z&\omega_y&-\omega_x&0\end{pmatrix}$$
+i.e. $\dot q=\tfrac12 q\otimes[0,\omega]$. Euler discretisation, sample time $T$:
 $$q_{k+1}=\Big(I+\tfrac T2 S(\omega_k)\Big)q_k=F_kq_k,\qquad P_{k+1}=F_kP_kF_k^\top+G_kR_\omega G_k^\top,\quad G_k=\tfrac T2 S_q(q_k)$$
-where $\omega_k=\omega_\text{meas}+e_\omega$, $e_\omega\sim\mathcal N(0,R_\omega)$ and $S_q(q)\,\omega=\omega\otimes q$. Because $F$ is linear in $q$, no linearisation is needed here. After the update $q\leftarrow q/\|q\|$.
+where $\omega_k=\omega_\text{meas}+e_\omega$, $e_\omega\sim\mathcal N(0,R_\omega)$ and $S_q(q)\,\omega=q\otimes\omega$. Because $F$ is linear in $q$, no linearisation is needed here. After the update $q\leftarrow q/\|q\|$.
 The gyroscope noise covariance measured at rest is used as $R_\omega$; no bias state, no model error term.
 
 ## Measurement updates (accelerometer, magnetometer)

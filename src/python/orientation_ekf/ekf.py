@@ -6,7 +6,7 @@ Per sample, in the same order as the course/live implementation:
 """
 from dataclasses import dataclass, field, replace
 import numpy as np
-from .quaternion import Sq, Somega, Sq_wb, Somega_wb, Qq, dQqdq, normalize
+from .quaternion import Sq, Somega, Qq, dQqdq, normalize
 
 
 @dataclass
@@ -21,7 +21,6 @@ class Config:
     mag_alpha: float = 0.6          # AR(1) coefficient of the running mean L_hat
     mag_thr: float = 0.9            # accept mag update if |m - L_hat| < thr [uT]; None = off
     mag_norm_tol: float = None      # extra gate (not in the course version): | |m| - |m0| | < tol
-    legacy_process_model: bool = False  # True = course-template Somega/Sq (inconsistent with Q(q); see docs/findings.md)
     use_acc: bool = True
     use_gyr: bool = True
     use_mag: bool = True
@@ -31,10 +30,9 @@ class Config:
         return replace(self, **kw)
 
 
-def time_update(x, P, omega, T, Rw, legacy=False):
-    S, Sn = (Somega, Sq) if legacy else (Somega_wb, Sq_wb)
-    F = np.eye(4) + 0.5 * T * S(omega)
-    G = 0.5 * T * Sn(x)
+def time_update(x, P, omega, T, Rw):
+    F = np.eye(4) + 0.5 * T * Somega(omega)
+    G = 0.5 * T * Sq(x)
     x = normalize(F @ x)
     return x, F @ P @ F.T + G @ Rw @ G.T
 
@@ -71,7 +69,7 @@ def run_filter(meas, cfg):
 
         w = meas.gyr[:, k]
         if cfg.use_gyr and not np.isnan(w).any():
-            x, P = time_update(x, P, w, T, cfg.Rw, cfg.legacy_process_model)
+            x, P = time_update(x, P, w, T, cfg.Rw)
 
         b = meas.mag[:, k]
         if cfg.use_mag and not np.isnan(b).any():

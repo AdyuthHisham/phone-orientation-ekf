@@ -1,14 +1,14 @@
 # Phone Orientation EKF
 
-> **What is this project about?** A phone knows which way it is facing by combining three weak sensors. We built the filter that does this (a quaternion Extended Kalman Filter), made it robust to hand motion and magnetic disturbance, and checked it on recorded live data.
+> **What is this project about?** A phone knows which way it is facing by combining three weak sensors. We built the filter that does this (a quaternion Extended Kalman Filter), and tested it on recorded live data, including hand motion and magnetic disturbance.
 
 ![MATLAB](https://img.shields.io/badge/MATLAB%2FOctave-offline%20code%20checked-orange) ![Python](https://img.shields.io/badge/Python-numpy%20%7C%20scipy%20%7C%20matplotlib-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-## TLDR (In brief)
+## TLDR
 
 ![Three 3D phones side by side: the phone's own estimate, our EKF, and gyro integration only](results/animations/orientation_comparison.gif)
 
-<sub>Recording A, 86–107 s (best-case window, picked automatically as the 20 s with the lowest heading error that still contains motion). Left: the phone's own estimate (reference). Middle: **our EKF**. Right: gyro integration only, never corrected. Bottom: error curves.</sub>
+<sub>Recording A, 86–107 s (best-case window, picked automatically as the 20 s with the lowest heading error that still contains motion). Left: the phone's own estimate (reference). Middle: **our EKF**. Right: gyro integration only, never corrected. Over the whole recording the heading is mostly wrong (see below); this window is the best case. Bottom: error curves.</sub>
 
 * **Problem:** estimate a phone's 3D orientation in real time from a gyroscope (drifts), an accelerometer (corrupted by hand motion) and a magnetometer (corrupted indoors).
 * **Approach:** EKF with a unit quaternion as state. Gyro drives the prediction; accelerometer (gravity) and magnetometer (north) drive the corrections; two gates reject bad samples.
@@ -18,10 +18,12 @@ Every number is an **angle error against the phone's own orientation estimate** 
 
 | Error vs. the phone's estimate | Our EKF | Gyro only |
 |---|---|---|
-| Tilt (roll/pitch), RMSE over the recording | **2.1°** | 48.5° |
-| Tilt, worst single sample | **6.9°** | 71.6° |
-| Heading (yaw), median error | **10.5°** (below 20° for 72% of the time) | 18.1° |
-| Heading (yaw), RMSE | 54.7° (inflated by magnetic disturbances) | 53.5° |
+| Tilt (roll/pitch), RMSE over the recording | **9.6°** | 92.2° |
+| Tilt, worst single sample | **61.7°** | 175.9° |
+| Heading (yaw), median error | 84.3° (below 20° for 13% of the time) | 75.8° |
+| Heading (yaw), RMSE | 106.3° | 91.5° |
+
+Tilt is tracked (median 3.0°, with short excursions during fast motion); heading is **not**: it is wrong for most of the recording, with or without the magnetometer.
 
 ## Repo Map
 
@@ -77,19 +79,19 @@ $$K=PH^\top(HPH^\top+R)^{-1},\quad q\leftarrow q+K\,(y-Q(q)v_0),\quad P\leftarro
 ## Our solutions
 
 ### P1 Gyro drift, solved by fusion
-Gyro-only tilt error grows to 48° after 60 s on recording A; with accelerometer fusion it stays below 7°.
+Gyro-only tilt error is already 22° after 30 s on recording A and is as bad as a random orientation by 60 s (148°). With accelerometer fusion the tilt RMSE is 7.2° (max 32°, ungated).
 
 ![Gyro-only drift](results/figures/gyro_drift.png)
 
-Gyro-only tilt error after 30 / 60 / 120 s: **A 26° / 48° / 58°**, B 1.6° / 3.3° / 4.9° (B is mostly at rest).
+Gyro-only tilt error after 30 / 60 / 120 s: **A 22° / 148° / 58°**, B 4.6° / 2.6° / 4.6° (B is mostly at rest).
 
 ### P2 Hand acceleration, solved by the accelerometer gate
-Updates are skipped when $\|a\|$ leaves the gravity band (red samples below). The gate cuts the worst tilt error from 13.1° to 6.9° on A (24.5° to 8.4° on B).
+Updates are skipped when $\|a\|$ leaves the gravity band (red samples below). In our offline runs the gate did **not** help: with it, tilt RMSE on A goes from 7.2° to 8.9° (max 32° to 61°), and on B from 8.1° to 123°, because skipped updates leave the filter to the gyro model, which drifts. The gates were tuned for the live recordings (A, C, E).
 
 ![Outlier gates](results/figures/outlier_gates.png)
 
 ### P3 Magnetic disturbance, partly solved by the adaptive magnetometer gate
-The gate rejects sudden field jumps (e.g. at 25 s where $|m|$ drops to ~0). Because $\hat L$ catches up within a few samples, it accepts a disturbance that persists, so heading in strongly disturbed spans (≈13–16 s, 25–38 s, 52–58 s, 65–72 s, 127–137 s) is still wrong. Outside them the EKF follows the phone's yaw.
+The gate rejects sudden field jumps (e.g. at 25 s where $|m|$ drops to ~0), but $\hat L$ catches up within a few samples, so it accepts a disturbance that persists. Heading is not tracked in this filter: the median heading error is 84° on A (13% of samples within 20°), and the magnetometer gate does not change it (83° ungated, 84° gated). Only in short stretches (e.g. 82–110 s) does the EKF yaw follow the phone's.
 
 ![Euler angles](results/figures/euler_angles.png)
 
@@ -109,19 +111,12 @@ Mean and covariance from a stationary recording give $R_a,R_\omega,R_m$.
 
 ![Noise model](results/figures/calibration_noise.png)
 
-### P6 Is the filter right? Solved by ablation, validation, and a bug hunt
-**Ablation** (filters start from the reference so initial misalignment does not mask effects). The accelerometer bounds tilt (48.5° → 2.3°), its gate improves it further (2.05°), and the magnetometer is what gives heading (median error 70° with accelerometer only, 11° with magnetometer added).
+### P6 Is the filter right? Ablation and validation
+**Ablation** (filters start from the reference so initial misalignment does not mask effects). The accelerometer bounds tilt (92° → 7–9° RMSE), but the magnetometer does not give a usable heading (median error 84° with accelerometer only, 84° with magnetometer added).
 
 ![Ablation](results/figures/ablation.png)
 
-| Recording | Gyro process model | Tilt error, RMSE | Tilt error, max |
-|---|---|---|---|
-| A | original model | 9.9° | 61.7° |
-| A | **corrected (this repo)** | **2.1°** | **6.9°** |
-| B | original model | 126.6° | 177.5° |
-| B | **corrected (this repo)** | **1.7°** | **8.6°** |
-
-Further findings (reference convention, a complex-valued `m0`, calibration consistency, over-confident covariance): [docs/findings.md](docs/findings.md).
+Further notes (reference convention, a complex-valued `m0` in the offline script, calibration consistency, over-confident covariance): [docs/findings.md](docs/findings.md).
 
 ### Real-time implementation
 The filter ran live: the Sensor Fusion app streams over TCP (port 3400) into MATLAB, `runEkfLive` runs one filter iteration per received sample (data within 5 ms count as concurrent, ~125 Hz) and shows our phone box next to the phone's own, flagging samples rejected by the gates. The recordings in `data/` came from this setup.
@@ -133,8 +128,8 @@ Python 3.10+, no MATLAB needed.
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-make demo         # ~5 s: EKF on recording A, prints metrics (tilt RMSE 2.05, heading median 10.48)
-make test         # ~10 s: matches stored MATLAB output, Jacobian check, kinematics check
+make demo         # ~5 s: EKF on recording A, prints metrics (tilt RMSE 9.90, heading median 84.08; starts from identity, not from the reference)
+make test         # ~10 s: matches stored MATLAB output, Jacobian check
 make figures      # ~5 min on 8 cores: regenerates every number, figure and the GIF
 ```
 MATLAB/Octave: run `src/matlab/scripts/reproduceMetrics.m` (same numbers).
@@ -144,7 +139,7 @@ MATLAB/Octave: run `src/matlab/scripts/reproduceMetrics.m` (same numbers).
 * Recording B is mostly stationary after 95 s with a constant but odd magnetometer norm (~40 µT); its heading numbers mainly show slow convergence.
 * Offline MATLAB code was checked in GNU Octave 11.3, not MATLAB itself. `runEkfLive.m` was not re-run here: it needs the phone, the course's `sensordata.jar` (place in `src/matlab/live/lib/`, then `startup`) and `OrientationView.m`, which are not included.
 * The raw stationary calibration recording is not included, only its mean and covariance.
-* Our filter has no gyro-bias state and its covariance is over-confident (0.01–0.03° vs 0.5–5° real tilt error). Heading in disturbed fields is the main open problem.
+* Our filter has no gyro-bias state and its covariance is over-confident (0.01–0.03° vs several degrees of real tilt error). Heading is the main open problem: it is wrong for most of the recording.
 
 ## Team Members
 

@@ -11,6 +11,6 @@ ok = ~any(isnan(ref), 1) & meas.t >= 5;   % skip the 5 s burn-in
 fprintf('total RMSE %.2f deg | tilt RMSE %.2f deg | heading RMSE %.2f deg\n', ...
         sqrt(mean(tot.^2)), sqrt(mean(tilt.^2)), sqrt(mean(head.^2)));
 
-% sanity check against the stored course-run output (legacy process model)
-legacy = runEkfOffline(meas, ekfConfig('legacyProcessModel', true));
-fprintf('max |x - stored xhat.x| with legacy model: %.2e\n', max(abs(legacy.x(:) - d.xhat.x(:))));
+% sanity check against the stored course-run output
+stored = runEkfOffline(meas, ekfConfig());
+fprintf('max |x - stored xhat.x|: %.2e\n', max(abs(stored.x(:) - d.xhat.x(:))));
