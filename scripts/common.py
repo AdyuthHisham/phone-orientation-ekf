@@ -40,6 +40,7 @@ def configs(m):
         'gyro + acc + mag, mag gate':       dict(acc_gate=None, x0=x0),
         'gyro + acc + mag, both gates':     dict(x0=x0),
         'final (identity init)':            dict(),
+        'final, course process model':      dict(legacy_process_model=True),
         'final + |m| norm gate (extra)':    dict(mag_norm_tol=10.0),
     }
 

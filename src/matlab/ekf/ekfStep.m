@@ -13,7 +13,7 @@ function [s, accOk, magOk] = ekfStep(s, cfg, t, acc, gyr, mag)
   end
 
   if cfg.useGyr && ~any(isnan(gyr))
-    [s.x, s.P] = ekfTimeUpdate(s.x, s.P, gyr, T, cfg.Rw);
+    [s.x, s.P] = ekfTimeUpdate(s.x, s.P, gyr, T, cfg.Rw, cfg.legacyProcessModel);
   end
 
   if cfg.useMag && ~any(isnan(mag))

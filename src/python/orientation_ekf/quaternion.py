@@ -19,6 +19,22 @@ def Somega(w):
     return np.array([[0, -x, -y, -z], [x, 0, z, -y], [y, -z, 0, x], [z, y, -x, 0]])
 
 
+def Somega_wb(w):
+    """4x4 matrix with dq/dt = 0.5 * Somega_wb(w) @ q for q = world->body (the filter convention).
+
+    Equals -L(omega), L = left-multiplication by the pure quaternion omega. The course-style
+    Somega above is the *right*-multiplication matrix, valid for q = body->world only.
+    """
+    x, y, z = w
+    return np.array([[0, x, y, z], [-x, 0, z, -y], [-y, -z, 0, x], [-z, y, -x, 0]])
+
+
+def Sq_wb(q):
+    """4x3 matrix with  omega (x) q = Sq_wb(q) @ omega  (noise input matrix for Somega_wb)."""
+    q0, q1, q2, q3 = q
+    return np.array([[-q1, -q2, -q3], [q0, q3, -q2], [-q3, q0, q1], [q2, -q1, q0]])
+
+
 def Qq(q):
     """3x3 rotation matrix of a unit quaternion."""
     q0, q1, q2, q3 = q

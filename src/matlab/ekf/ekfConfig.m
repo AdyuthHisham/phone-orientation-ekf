@@ -12,6 +12,7 @@ function cfg = ekfConfig(varargin)
   cfg.magAlpha = 0.6;        % AR(1) coefficient of the running mean
   cfg.magThreshold = 0.9;    % accept mag update if |m - Lhat| < threshold [uT]
   cfg.useAcc = true; cfg.useGyr = true; cfg.useMag = true;
+  cfg.legacyProcessModel = false;
   cfg.x0 = [1; 0; 0; 0];
   for i = 1:2:numel(varargin), cfg.(varargin{i}) = varargin{i+1}; end
 end
