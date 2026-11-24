@@ -4,7 +4,7 @@ function [xhat, meas] = runEkfLive(port)
 %   (see startup.m) and OrientationView.m on the MATLAB path. Start this function first, then
 %   start streaming from the phone (Sensor Fusion app) to this computer's IP, port 3400.
 %   Returns the estimates xhat (t, x, P) and the raw measurements meas, incl. the phone's own
-%   orientation. Untested in this repo: no MATLAB licence or phone stream were available.
+%   orientation. Not run in this repo: no phone stream was available.
   if nargin < 1, port = 3400; end
   import('com.liu.sensordata.*');
   cfg = ekfConfig();

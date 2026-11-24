@@ -6,7 +6,7 @@
 
 <sub>Recording A, 86–107 s. Left: the phone's own estimate (reference). Middle: this EKF. Right: gyro integration only, started aligned at t = 0 and never corrected. The 20 s window was selected automatically as the span with the lowest EKF heading error that still contains motion, so it is a best-case window. Heading errors elsewhere in the run are large; see [Results](#results). Bottom: error curves for the whole window.</sub>
 
-![MATLAB](https://img.shields.io/badge/MATLAB-code%20(not%20run%20here)-orange) ![Python](https://img.shields.io/badge/Python-numpy%20%7C%20scipy%20%7C%20matplotlib-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+![MATLAB](https://img.shields.io/badge/MATLAB-code%20(checked%20in%20Octave)-orange) ![Python](https://img.shields.io/badge/Python-numpy%20%7C%20scipy%20%7C%20matplotlib-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 > **Coursework project** (SSY345 Sensor Fusion and Nonlinear Filtering, Chalmers), done in a group of two. The course supplied the
 > task, the live-streaming template, the visualisation class, the Java data receiver, the Sensor Fusion phone app and the basic quaternion helper
@@ -103,7 +103,7 @@ Gyro-only tilt error after 30 / 60 / 120 s: **A: 26° / 48° / 58°** (it grows 
 The original filter runs live: the Sensor Fusion phone app streams sensor data over TCP (port 3400) into MATLAB through the course's Java receiver, `runEkfLive` runs one filter iteration per received sample (data within 5 ms are treated as concurrent, ~125 Hz), and a 3D viewer (course-provided `OrientationView`) shows the EKF's phone box next to the phone's own estimate, flagging samples rejected by the gates. The recordings in `data/` came from this setup.
 
 * Code: [`src/matlab/live/runEkfLive.m`](src/matlab/live/runEkfLive.m), sharing `ekfStep.m` with the offline runner.
-* **Not runnable from this repo as is, and not tested here:** it needs the course's `sensordata.jar` (put it in `src/matlab/live/lib/`, then run `startup`) and `OrientationView.m`, neither of which is redistributed, plus the phone app, and I had no MATLAB licence or phone stream while preparing this repo.
+* **Not runnable from this repo as is, and not tested here:** it needs the course's `sensordata.jar` (put it in `src/matlab/live/lib/`, then run `startup`) and `OrientationView.m`, neither of which is redistributed, plus the phone app, and I had no phone stream while preparing this repo. (The offline MATLAB code it shares with `ekfStep.m` was checked under Octave, see above.)
 
 ## How to run
 
@@ -117,7 +117,7 @@ make test         # ~10 s: port == MATLAB output, Jacobian check, kinematics che
 make figures      # ~5 min on 8 cores: every number, figure and the GIF in results/
 ```
 
-Expected `make demo` output (tilt RMSE 2.05, tilt max 6.87, heading median 10.48, heading RMSE 54.72). With MATLAB: `run src/matlab/scripts/reproduceMetrics.m` (same numbers expected, **untested**).
+Expected `make demo` output (tilt RMSE 2.05, tilt max 6.87, heading median 10.48, heading RMSE 54.72). MATLAB/Octave: `run src/matlab/scripts/reproduceMetrics.m` prints the same tilt and heading RMSE (checked with GNU Octave 11.3; not run in MATLAB itself).
 
 ## Repo map
 
@@ -148,7 +148,7 @@ docs/                       derivation.md, conventions.md, findings.md
 | Filter tuning & ablation methodology | [ablation.png](results/figures/ablation.png), [sensitivity.png](results/figures/sensitivity.png), [`metrics.csv`](results/metrics.csv) |
 | Debugging / verification | Port validated to 6.5e-8 against MATLAB output; found the process/measurement model inconsistency and a complex-valued `m0` bug ([findings](docs/findings.md)) |
 | Real-time streaming & signal processing | Live loop with 5 ms sample grouping and gating: [`runEkfLive.m`](src/matlab/live/runEkfLive.m) (written for the course; not re-run here) |
-| MATLAB and Python scientific computing | Both implementations of the same filter |
+| MATLAB and Python scientific computing | Both implementations of the same filter (MATLAB checked in Octave) |
 | Reproducible research & scientific visualisation | One-command pipeline `make figures`, colour-blind-safe figures, 3D animation |
 | Technical writing | This README and [`docs/`](docs/) |
 
@@ -158,7 +158,7 @@ docs/                       derivation.md, conventions.md, findings.md
 * **Reference, not ground truth.** An external motion-capture or turntable reference would be needed for absolute accuracy claims.
 * **Two recordings with a reference and all sensors; tuning is by hand.** Results depend on τ, α and the gate limits, and the stored calibration covariances are not stationary-condition invariant ([findings §5](docs/findings.md)).
 * **Over-confident covariance:** no gyro-bias state, no model for linear acceleration, no covariance-consistent normalisation. Process noise reuses the sensor noise covariance.
-* **MATLAB code untested here;** the verified implementation is the Python port (which matches the recorded MATLAB output).
+* **MATLAB verification:** the offline MATLAB code was only run under GNU Octave 11.3, not MATLAB itself, and the live script was never run in this repo. The Python port is the primary implementation (it matches the recorded MATLAB output).
 * **Not done:** UKF/particle-filter comparison, complementary/Madgwick/Mahony baselines, adaptive noise, bias estimation in the state, error-state formulation.
 
 ## Acknowledgements

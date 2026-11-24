@@ -7,7 +7,7 @@ The Python port reproduces the quaternion trajectory stored by the original MATL
 (max abs difference ≤ 6.5e-8, `results/validation.csv`). The live settings were recovered by searching over candidate settings until the
 stored output was reproduced: acc gate 9.6–9.95 m/s², α = 0.6, threshold 0.9, $\hat L_0$ = calibration mean (recordings A, C, E); gates off (B, D, F).
 The lab calibration constants come from `calAcc/calGyr/calMag` stored with the recordings.
-The MATLAB code in `src/matlab` is a refactor of that code and **was not executed** (no MATLAB licence was available).
+The MATLAB code in `src/matlab` is a refactor of that code. It was run under **GNU Octave 11.3** (not MATLAB itself): `reproduceMetrics.m` gives the same metrics as the Python port (tilt RMSE 2.05°, heading RMSE 54.72°) and reproduces the stored output with the course-style process model to 8.8e-9. The live script `runEkfLive.m` could not be run (needs the phone, the course jar and `OrientationView`).
 
 ## 2. The course-style process model is inconsistent with the measurement model
 The template's $S(\omega)$ is the matrix of *right* multiplication, $\dot q=\tfrac12 q\otimes\omega$, which holds for $q$ body→world.
