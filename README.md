@@ -148,10 +148,6 @@ MATLAB/Octave: run `src/matlab/scripts/reproduceMetrics.m` (same numbers).
 * The raw stationary calibration recording is not included, only its mean and covariance.
 * Our filter has no gyro-bias state and its covariance is over-confident (0.01–0.03° vs 0.5–5° real tilt error). Heading in disturbed fields is the main open problem.
 
-## Team Members
-
-Group project of two students, built for SSY345 Sensor Fusion and Nonlinear Filtering, Chalmers.
-
 ## License
 
 MIT, see [LICENSE](LICENSE).
