@@ -1,6 +1,6 @@
 # Phone Orientation EKF
 
-> **What is this project about?** A phone knows which way it is facing by combining three weak sensors. We built the filter that does this (a quaternion Extended Kalman Filter), made it robust to hand motion and magnetic disturbance, found and fixed a modelling bug in the course starting point, and checked it on recorded live data.
+> **What is this project about?** A phone knows which way it is facing by combining three weak sensors. We built the filter that does this (a quaternion Extended Kalman Filter), made it robust to hand motion and magnetic disturbance, and checked it on recorded live data.
 
 ![MATLAB](https://img.shields.io/badge/MATLAB%2FOctave-offline%20code%20checked-orange) ![Python](https://img.shields.io/badge/Python-numpy%20%7C%20scipy%20%7C%20matplotlib-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
