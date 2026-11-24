@@ -7,3 +7,4 @@ __pycache__/
 .DS_Store
 # course-provided, not redistributed (see README "Real-time implementation")
 *.jar
+README.html
