@@ -14,12 +14,14 @@
 * **Approach:** EKF with a unit quaternion as state. Gyro drives the prediction; accelerometer (gravity) and magnetometer (north) drive the corrections; two gates reject bad samples.
 * **Results** (recording A, vs. the phone's own estimate):
 
-| | Our EKF | Gyro only |
+Every number is an **angle error against the phone's own orientation estimate** (lower is better).
+
+| Error vs. the phone's estimate | Our EKF | Gyro only |
 |---|---|---|
-| Tilt (roll/pitch) RMSE | **2.1°** | 48.5° |
-| Tilt max | **6.9°** | 71.6° |
-| Heading (yaw) median error | **10.5°** (within 20° for 72% of the time) | 18.1° |
-| Heading RMSE | 54.7° (magnetic disturbances) | 53.5° |
+| Tilt (roll/pitch), RMSE over the recording | **2.1°** | 48.5° |
+| Tilt, worst single sample | **6.9°** | 71.6° |
+| Heading (yaw), median error | **10.5°** (below 20° for 72% of the time) | 18.1° |
+| Heading (yaw), RMSE | 54.7° (inflated by magnetic disturbances) | 53.5° |
 
 ## Repo Map
 
@@ -48,7 +50,7 @@ docs/                       derivation.md, conventions.md, findings.md
 | P6 | **Is the filter itself right?** | No ground truth exists; we only have the phone's own estimate to compare with. |
 
 ![Raw sensor streams](results/figures/sensor_streams.png)
-*Raw streams (recording A): |a| ≈ 9.8 m/s² at rest with spikes during motion (P2), and steps in the magnetometer norm (P3).*
+*What this shows: the raw input the filter gets (recording A), one row per signal. Rows 1–2: accelerometer and its magnitude; at rest the magnitude sits at gravity (≈9.8 m/s², inside the green accepted band) and spikes whenever the hand moves, so those samples are not a clean gravity reading (P2). Row 3: gyroscope. Rows 4–5: magnetometer and its magnitude; it should stay at the calibrated Earth-field value (line) but jumps in steps near magnets and metal (P3).*
 
 ## Approach we took
 
@@ -91,9 +93,11 @@ The gate rejects sudden field jumps (e.g. at 25 s where $|m|$ drops to ~0). Beca
 
 ![Euler angles](results/figures/euler_angles.png)
 
+<!--
 The sensitivity of the gate to $\alpha$ and $\tau$: tilt is insensitive (2.0–2.1° on A); heading is flat for large $\tau$ and collapses on B when a small $\tau$ rejects almost every magnetometer sample.
 
 ![Sensitivity](results/figures/sensitivity.png)
+-->
 
 ### P4 Non-linearity, solved with the EKF Jacobian and renormalisation
 $H=[\partial Q/\partial q_i\,v_0]$ is implemented in `dQqdq` and checked against finite differences in `tests/test_filter.py`. The covariance mapped to rotation angles grows during gyro prediction and shrinks at accepted updates:
@@ -110,9 +114,7 @@ Mean and covariance from a stationary recording give $R_a,R_\omega,R_m$.
 
 ![Ablation](results/figures/ablation.png)
 
-**A modelling bug found and fixed.** The course-style gyro process model was inconsistent with the measurement model $y=Q(q)v$. A 2 s prediction test from the reference orientation showed tilt error with a 90th percentile of 167° for the original model and 6° for the corrected one. Fixing it:
-
-| Recording | | Tilt RMSE | Tilt max |
+| Recording | Gyro process model | Tilt error, RMSE | Tilt error, max |
 |---|---|---|---|
 | A | original model | 9.9° | 61.7° |
 | A | **corrected (this repo)** | **2.1°** | **6.9°** |
