@@ -4,7 +4,7 @@
 
 ![MATLAB](https://img.shields.io/badge/MATLAB%2FOctave-offline%20code%20checked-orange) ![Python](https://img.shields.io/badge/Python-numpy%20%7C%20scipy%20%7C%20matplotlib-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-## TLDR (In brief)
+## TLDR
 
 ![Three 3D phones side by side: the phone's own estimate, our EKF, and gyro integration only](results/animations/orientation_comparison.gif)
 
@@ -50,7 +50,7 @@ docs/                       derivation.md, conventions.md, findings.md
 | P6 | **Is the filter itself right?** | No ground truth exists; we only have the phone's own estimate to compare with. |
 
 ![Raw sensor streams](results/figures/sensor_streams.png)
-*What this shows: the raw input the filter gets (recording A), one row per signal. Rows 1–2: accelerometer and its magnitude; at rest the magnitude sits at gravity (≈9.8 m/s², inside the green accepted band) and spikes whenever the hand moves, so those samples are not a clean gravity reading (P2). Row 3: gyroscope. Rows 4–5: magnetometer and its magnitude; it should stay at the calibrated Earth-field value (line) but jumps in steps near magnets and metal (P3).*
+*What this shows: the raw input the filter gets (recording A), one row per signal. Rows 1–2: accelerometer and its magnitude (black line, |a|); at rest the magnitude sits at gravity (≈9.8 m/s², inside the green accepted band) and spikes whenever the hand moves, so those samples are not a clean gravity reading (P2). Row 3: gyroscope. Rows 4–5: magnetometer and its magnitude; the black line is |m|; it should stay at the calibrated Earth-field value (coloured line) but jumps in steps near magnets and metal (P3).*
 
 ## Approach we took
 
@@ -113,6 +113,8 @@ Mean and covariance from a stationary recording give $R_a,R_\omega,R_m$.
 **Ablation** (filters start from the reference so initial misalignment does not mask effects). The accelerometer bounds tilt (48.5° → 2.3°), its gate improves it further (2.05°), and the magnetometer is what gives heading (median error 70° with accelerometer only, 11° with magnetometer added).
 
 ![Ablation](results/figures/ablation.png)
+
+**A modelling bug, found while reproducing this project.** It was not noticed in the original course submission (the report's eq. 3 and Appendix A.1 use the template's `Somega`/`Sq` unchanged); we found it while rebuilding the project for this repo. The template's gyro process model, $\dot q=\tfrac12 q\otimes\omega$, is only valid for $q$ body→world, but the measurement model $y=Q(q)v$ uses $q$ world→body, whose kinematics is $\dot q=-\tfrac12 L(\omega)q$. A 2 s gyro-only prediction from the reference orientation had a tilt error with a 90th percentile of 167° for the original model and 6° for the corrected one. The accelerometer's tiny covariance hid this for tilt, but not for heading. Effect on the full filter:
 
 | Recording | Gyro process model | Tilt error, RMSE | Tilt error, max |
 |---|---|---|---|

@@ -10,6 +10,8 @@ The lab calibration constants come from `calAcc/calGyr/calMag` stored with the r
 The MATLAB code in `src/matlab` is a refactor of that code. It was run under **GNU Octave 11.3** (not MATLAB itself): `reproduceMetrics.m` gives the same metrics as the Python port (tilt RMSE 2.05°, heading RMSE 54.72°) and reproduces the stored output with the course-style process model to 8.8e-9. The live script `runEkfLive.m` could not be run (needs the phone, the course jar and `OrientationView`).
 
 ## 2. The course-style process model is inconsistent with the measurement model
+**Found while reproducing this project for this repo, not during the course:** the submitted report (eq. 3, Appendix A.1) uses the template's `Somega`/`Sq` unchanged.
+
 The template's $S(\omega)$ is the matrix of *right* multiplication, $\dot q=\tfrac12 q\otimes\omega$, which holds for $q$ body→world.
 The measurement model $y=Q(q)v_0$ uses $q$ world→body. Starting from the phone's own orientation and integrating the gyro for 2 s, the tilt error
 (median / 90th percentile over 23 windows, recording A) is 33° / 167° with the template matrix and 2.5° / 6.1° with $S=-L(\omega)$.

@@ -39,9 +39,9 @@ def fig_sensor_streams(m, r):
     fig, ax = plt.subplots(5, 1, figsize=(11, 10), sharex=True, height_ratios=[1.2, .8, 1.2, 1.2, .8])
     ax[0].plot(t, m.acc.T, lw=.6); ax[0].set_ylabel('acc [m/s²]'); ax[0].set_title('Accelerometer')
     ax[0].legend(['x', 'y', 'z'], ncol=3, loc='upper right')
-    ax[1].plot(t, an, color='k', lw=.6); ax[1].axhspan(*default_config().acc_gate, color=C['acc'], alpha=.35, label='accepted band 9.6–9.95')
-    ax[1].set_ylim(0, 25); ax[1].set_ylabel('|acc| [m/s²]'); ax[1].legend(loc='upper right')
-    ax[1].annotate('shaking / hand motion:\n|a| ≠ g, so gravity direction is corrupted', xy=(42, 22), xytext=(50, 14), fontsize=9,
+    ax[1].plot(t, an, color='k', lw=.6, label='|a| (accelerometer magnitude)'); ax[1].axhspan(*default_config().acc_gate, color=C['acc'], alpha=.35, label='accepted band 9.6–9.95')
+    ax[1].set_ylim(0, 32); ax[1].set_ylabel('|acc| [m/s²]'); ax[1].legend(loc='lower right', bbox_to_anchor=(1, 1), ncol=2, frameon=False, fontsize=9)
+    ax[1].annotate('shaking / hand motion:\n|a| ≠ g, so gravity direction is corrupted', xy=(42, 22), xytext=(46, 15), fontsize=9,
                    arrowprops=dict(arrowstyle='->', color=C['grey']))
     ax[2].plot(t, m.gyr.T, lw=.6); ax[2].set_ylabel('gyro [rad/s]'); ax[2].set_title('Gyroscope')
     ax[2].legend(['x', 'y', 'z'], ncol=3, loc='upper right')
@@ -49,8 +49,8 @@ def fig_sensor_streams(m, r):
                    arrowprops=dict(arrowstyle='->', color=C['grey']))
     ax[3].plot(t, m.mag.T, lw=.6); ax[3].set_ylabel('mag [µT]'); ax[3].set_title('Magnetometer')
     ax[3].legend(['x', 'y', 'z'], ncol=3, loc='upper right')
-    ax[4].plot(t, mn, color='k', lw=.6); ax[4].axhline(np.linalg.norm(cal.m0), color=C['mag'], lw=1.5, label=f'calibrated |m₀| = {np.linalg.norm(cal.m0):.0f} µT')
-    ax[4].set_ylabel('|mag| [µT]'); ax[4].set_xlabel('time [s]'); ax[4].legend(loc='upper right')
+    ax[4].plot(t, mn, color='k', lw=.6, label='|m| (magnetometer magnitude)'); ax[4].axhline(np.linalg.norm(cal.m0), color=C['mag'], lw=1.5, label=f'calibrated |m₀| = {np.linalg.norm(cal.m0):.0f} µT')
+    ax[4].set_ylabel('|mag| [µT]'); ax[4].set_xlabel('time [s]'); ax[4].set_ylim(0, 200); ax[4].legend(loc='lower right', bbox_to_anchor=(1, 1), ncol=2, frameon=False, fontsize=9)
     ax[4].annotate('indoor disturbances: field strength jumps\nbetween ~70 and ~145 µT (should be constant)', xy=(26, 4), xytext=(40, 20), fontsize=9,
                    arrowprops=dict(arrowstyle='->', color=C['grey']))
     fig.suptitle(f'Raw sensor streams, recording A ({t[-1]:.0f} s, ~125 Hz)', fontweight='bold', y=.995)
